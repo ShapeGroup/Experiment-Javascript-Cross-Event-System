@@ -4,8 +4,7 @@
         const cross_events =
         {
 
-            is_button_pressed : null,
-            is_over_a_target : null,
+            is_button_pressed : false,
 
             is_touch_device : function ()
             {
@@ -14,36 +13,40 @@
 
             },
 
-            on_pointer_start : function ()
+            on_pointer_down : function ()
             {
 
                 return this.is_button_pressed ? 'dragstart' : this.is_touch_device() ? 'touchstart' : 'mousedown';
 
             },
 
-            on_pointer_move : function ()
+            on_pointer_move : function (target)
             {
 
                 return this.is_touch_device() ? 'touchmove' : 'mousemove';
 
             },
 
-            on_pointer_in : function ()
-            {
-                // ... but .... if create a directly check if is it in target?
-                return this.is_button_pressed ? 'dragover' : 'mouseover';
+            // hover: function (target)
+            // {
+            //
+            //     if(!target||target==null)
+            //     {
+            //         return false;
+            //     }
+            //     else
+            //     {
+            //         console.log('target',target);
+            //         return target;
+            //     }
+            //     // // ... but .... if create a directly check if is it in target?
+            //     // return this.is_button_pressed ? 'dragover' : 'mouseover';
+            //     // // ... but .... if create a directly check if is it in target?
+            //     // return 'mouseleave';
+            //
+            // },
 
-            },
-
-            on_pointer_out : function ()
-            {
-
-                // ... but .... if create a directly check if is it in target?
-                return 'mouseleave';
-
-            },
-
-            on_pointer_end : function ()
+            on_pointer_up : function ()
             {
 
                 return (this.is_touch_device())?'touchend':'mouseup';
@@ -57,20 +60,18 @@
 
                 // get how event is it...
                 let crosseventtype = ['touchmove','mousemove'].indexOf(event.type)>-1                 ?  'on_pointer_move' :
-                                     ['touchstart','dragstart','mousedown'].indexOf(event.type)>-1    ?  'on_pointer_start' :
-                                     ['touchend','dragend','ondrop','mouseup'].indexOf(event.type)>-1 && 'on_pointer_end';
+                                     ['touchstart','dragstart','mousedown'].indexOf(event.type)>-1    ?  'on_pointer_down' :
+                                     ['touchend','dragend','ondrop','mouseup'].indexOf(event.type)>-1 && 'on_pointer_up';
 
                 //check if button is down...
-                "on_pointer_start"==crosseventtype?this.is_button_pressed=true:"on_pointer_end"==crosseventtype&&(this.is_button_pressed=false);
-
+                "on_pointer_down"==crosseventtype?this.is_button_pressed=true:"on_pointer_up"==crosseventtype&&(this.is_button_pressed=false);
 
                 // compile new event output
                 return event = {
                     'webtype'        : event.type,
                     'crosstype'      : crosseventtype ,
                     'target'         : event.target || event.srcElement,
-                    'isover'         : this.is_over_a_target || false,
-                    'datas'          : event.dataTransfer || event.clipboardData || 'no-data',
+                    'datas'          : event.dataTransfer || event.clipboardData || 'no-data-retrived',
                     'positions'      : {
 
                         'screenX'    : event.x || event.clientX,
@@ -84,7 +85,7 @@
                     'button'         : {
 
                         'ispressed'  : this.is_button_pressed,
-                        'type'       :(crosseventtype!='on_pointer_move'&&crosseventtype!='on_pointer_end') ? ( event.which || ( 2===event.button ? event.button=3 : 4===event.button ? event.button=2 : event.button=1)) : '-'
+                        'type'       :(crosseventtype!='on_pointer_move'&&crosseventtype!='on_pointer_up') ? ( event.which || ( 2===event.button ? event.button=3 : 4===event.button ? event.button=2 : event.button=1)) : '-'
 
                     }
                 }
@@ -94,11 +95,10 @@
         }
 
         document.addEventListener(
-        cross_events.on_pointer_start(),
+        cross_events.on_pointer_down(),
         myactioneventname => {
 
-            // console.log(cross_events.read_event( myactioneventname ).button.ispressed);
-             console.log('this is "click start" test', cross_events.read_event( myactioneventname ) )
+            // console.log('this is "click start" test', cross_events.read_event( myactioneventname ) )
 
         },true);
 
@@ -106,30 +106,25 @@
         cross_events.on_pointer_move(),
         myactioneventname => {
 
-            console.log(cross_events.read_event( myactioneventname ).button.ispressed);
+            // console.log(cross_events.read_event( myactioneventname ).button.ispressed);
             // console.log('this is "drag/move start" test', cross_events.read_event( myactioneventname ) )
-
-
-            // not good way....
-            // let targetelement = document.getElementsByTagName('p');
-            // cross_events.pointer_over( targetelement, ()=>{
-            //
-            // });
-            //
-            // cross_events.pointer_exit( targetelement, ()=>{
-            //
-            // });
-
 
         },true);
 
-
-
         document.addEventListener(
-        cross_events.on_pointer_end(),
+        cross_events.on_pointer_up(),
         myactioneventname => {
 
             // console.log(cross_events.read_event( myactioneventname ).button.ispressed);
-             console.log('this is "click/drag/move event end" test', cross_events.read_event( myactioneventname ) )
+            // console.log('this is "click/drag/move end" test', cross_events.read_event( myactioneventname ) )
+
+            if( [...document.getElementsByTagName('p')].indexOf(myactioneventname.target)>-1 )
+            {
+                console.log('hover on: ',myactioneventname.target);
+            }
+            else
+            {
+                console.log('is out');
+            }
 
         },true);
