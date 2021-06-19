@@ -1,2 +1,5 @@
-# Experiment-Javascript-Cross-Event-System
-(under costruction) Simple sistem for make cross compatible and rapid user action via listners
+# experimental-javascript-cross-user-events
+
+EXPERIMENTAL : *UNDER COSTRUCTION*
+
+> Based on standard listners, it's little experimental system for make cross compatible user actions.
